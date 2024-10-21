@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Radicalización</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.4.0/math.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f5;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultado, #explicacion {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Radicalización</h1>
+    <div class="container">
+        <h2>Ingrese la expresión de radicalización:</h2>
+        <input type="text" id="expresion" placeholder="Ejemplo: sqrt(2) * (sqrt(6) + sqrt(20))" required>
+        <button onclick="calcular()">Calcular</button>
+        <div id="resultado"></div>
+        <div id="explicacion"></div> <!-- Sección para mostrar la explicación -->
+    </div>
+
+    <script>
+        function calcular() {
+            const expresion = document.getElementById("expresion").value;
+            let resultadoSimplificado, resultadoDecimal;
+
+            try {
+                // Simplificar la expresión y obtener el resultado decimal
+                resultadoSimplificado = math.simplify(expresion).toString();
+                resultadoDecimal = math.evaluate(expresion);
+
+                // Explicación personalizada basada en la expresión
+                let explicacion = `<h3>Explicación:</h3>`;
+                explicacion += `<p>Para calcular la expresión <strong>${expresion}</strong>, realizamos los siguientes pasos:</p>`;
+
+                // Separar partes de la expresión para su análisis
+                const partes = expresion.split(/([\+\-\*\/])/).filter(Boolean);
+                partes.forEach((parte) => {
+                    if (parte.includes('sqrt')) {
+                        explicacion += `<ul>`;
+                        explicacion += `<li>Consideramos la raíz: <strong>${parte}</strong>.</li>`;
+                        
+                        // Extraer el número bajo la raíz
+                        const numeroBajoRaiz = parte.match(/sqrt\((\d+)\)/);
+                        if (numeroBajoRaiz) {
+                            const numero = parseInt(numeroBajoRaiz[1]);
+                            explicacion += `<li>El número <strong>${numero}</strong> se puede simplificar buscando factores.</li>`;
+
+                            // Proceso de simplificación
+                            let factores = [];
+                            for (let i = 1; i <= Math.sqrt(numero); i++) {
+                                if (numero % (i * i) === 0) {
+                                    factores.push(i);
+                                }
+                            }
+                            
+                            // Resumen de la simplificación
+                            if (factores.length > 0) {
+                                explicacion += `<li>Los factores encontrados son: ${factores.join(', ')}.</li>`;
+                                const simplificado = factores.length ? `${factores[0]} * sqrt(${numero / (factores[0] ** 2)})` : `sqrt(${numero})`;
+                                explicacion += `<li>Esto significa que <strong>sqrt(${numero})</strong> se simplifica a <strong>${simplificado}</strong>.</li>`;
+                            } else {
+                                explicacion += `<li>No se encontraron factores para simplificar.</li>`;
+                            }
+                        }
+                        explicacion += `</ul>`;
+                    }
+                });
+
+                explicacion += `<p>El resultado simplificado es: <strong>${resultadoSimplificado}</strong>.</p>`;
+                explicacion += `<p>El resultado en forma decimal es: <strong>${resultadoDecimal}</strong>.</p>`;
+
+                document.getElementById("resultado").innerHTML = `
+                    <h3>Resultado:</h3>
+                    <p>La expresión <strong>${expresion}</strong> da como resultado simplificado: <strong>${resultadoSimplificado}</strong>.</p>
+                    <p>El resultado en forma decimal es: <strong>${resultadoDecimal}</strong>.</p>
+                `;
+                document.getElementById("explicacion").innerHTML = explicacion;
+
+            } catch (error) {
+                alert("La expresión ingresada no es válida. Por favor, verifique e intente de nuevo.");
+            }
+        }
+    </script>
+</body>
+</html>
